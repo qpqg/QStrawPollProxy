@@ -1,5 +1,4 @@
 import requests
-import threading
 import os
 from re import findall
 #check20369851
@@ -30,7 +29,7 @@ def pepong():
     cek = requests.session()
     dic = {}
     count = 0    
-    page = cek.get("https://www.sslproxies.org").text
+    page = cek.get("https://free-proxy-list.net").text
     proxy = findall(r"\d+\.\d+\.\d+\.\d+",page)
     port = findall(r"\**<td>\d+</td>", page)
     for i in range(len(proxy)):
@@ -42,13 +41,14 @@ def pepong():
     
 def strawpoll(pid, vote, proxy):
     with requests.session() as c:
+        timeout = 10
         data = {"pid":pid, "oids":vote}
         url = "https://strawpoll.com/"+pid
         print "Cek Nama: "+vote
         proxy = {"http":"http://"+proxy,
                  "https":"https://"+proxy}
         try:
-            req = c.get(url, proxies=proxy)
+            req = c.get(url, proxies=proxy, timeout=timeout)
             h = {"Origin": "https://strawpoll.com",
                  "X-Requested-With": "XMLHttpRequest",
                  "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/7.0.185.1002 Safari/537.36",
@@ -56,10 +56,12 @@ def strawpoll(pid, vote, proxy):
                  "Referer": "https://strawpoll.com/"+pid,
                  "Accept-Encoding": "gzip, deflate, br",
                  "Accept-Language": "en-US,en;q=0.8"}
-            resp = c.post("https://strawpoll.com/vote?", data=data, proxies=proxy, headers=h)
+            resp = c.post("https://strawpoll.com/vote?", data=data, proxies=proxy, timeout=timeout, headers=h)
             print resp.text
             c.cookies.clear()
             c.cookies.keys()
+        except requests.exceptions.Timeout, e:
+            print e
         except requests.exceptions.ConnectionError as e:
             print e
 
